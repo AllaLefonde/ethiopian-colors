@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harar's colours</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: #aea6a0;
+    color: #20292F;
+    font-family: "Inter", "Helvetica Neue", -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+    gap: 24px;
+    min-height: 100vh;
+  }
+
+  .row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: nowrap;
+  }
+  .rect {
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    border: 0;
+    padding: 0;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .rect:hover { transform: translateY(-2px); }
+  .rect.active {
+    box-shadow:
+      0 0 0 3px rgba(32,41,47,0.85),
+      0 10px 24px rgba(0,0,0,0.45),
+      inset 0 0 24px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+  }
+  .spacer {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* ====== Pair view (adapted from between-incidents) ====== */
+  .pair-stage {
+    width: 100%;
+    max-width: 1600px;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    padding: 16px 32px;
+    align-items: center;
+    justify-items: center;
+  }
+  .pair-stage.active { display: grid; animation: viewFadeIn 0.45s ease both; }
+  @keyframes viewFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .frame-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    background: transparent;
+    transition: transform 0.35s ease;
+  }
+  .pair-stage.mixed .frame-box.portrait {
+    transform: translateX(var(--mixed-portrait-shift, 0px));
+  }
+  .pair-stage.mixed .frame-box.landscape {
+    align-items: flex-end;
+    transform: translateY(var(--landscape-shift, 0px));
+  }
+  .pair-stage.both-portrait #frame-a {
+    transform: translateX(var(--portrait-shift-a, 0));
+  }
+  .pair-stage.both-portrait #frame-b {
+    transform: translateX(var(--portrait-shift-b, 0));
+  }
+  .frame-box img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .frame-box img.loaded { opacity: 1; }
+  .frame-box { overflow: visible; }
+</style>
+</head>
+<body>
+
+<div class="row" id="btn-row">
+  <button class="rect" style="background:#b23a2b" data-folder="4">H</button>
+  <button class="rect" style="background:#d67a3a" data-folder="10">a</button>
+  <button class="rect" style="background:#8a5a3c" data-folder="8">r</button>
+  <button class="rect" style="background:#a08978" data-folder="6">a</button>
+  <button class="rect" style="background:#c9a13a" data-folder="9">r</button>
+  <button class="rect" style="background:#c9a24a" data-folder="1">'</button>
+  <button class="rect" style="background:#e6c76e" data-folder="14">s</button>
+  <div class="spacer"></div>
+  <button class="rect" style="background:#3ea89a" data-folder="11">c</button>
+  <button class="rect" style="background:#4a9990" data-folder="13">o</button>
+  <button class="rect" style="background:#3a6a8c" data-folder="3">l</button>
+  <button class="rect" style="background:#1f6fb3" data-folder="2">o</button>
+  <button class="rect" style="background:#6a8aa3" data-folder="12">u</button>
+  <button class="rect" style="background:#c07488" data-folder="5">r</button>
+  <button class="rect" style="background:#c07480" data-folder="7">s</button>
+</div>
+
+<section class="pair-stage" id="pair-stage">
+  <div class="frame-box" id="frame-a"><img id="pair-a" alt="" decoding="async"></div>
+  <div class="frame-box" id="frame-b"><img id="pair-b" alt="" decoding="async"></div>
+</section>
+
+<script>
+  const FOLDER_FILES = {
+    1:  ["1/DSC02098.jpg",     "1/DSC07127.jpg"],
+    2:  ["2/DSC05025.jpg",     "2/DSC06177.jpg"],
+    3:  ["3/1_DSC02272.jpg",   "3/2_DSC03114.jpg"],
+    4:  ["4/DSC02100.jpg",     "4/DSC02403.jpg"],
+    5:  ["5/DSC02092.jpg",     "5/DSC08067.jpg"],
+    6:  ["6/DSC05017.jpg",     "6/DSC06768.jpg"],
+    7:  ["7/DSC02474.jpg",     "7/DSC05588.jpg"],
+    8:  ["8/DSC01880.jpg",     "8/DSC02548.jpg"],
+    9:  ["9/DSC05002.jpg",     "9/DSC05041.jpg"],
+    10: ["10/DSC01939.jpg",    "10/DSC02964.jpg"],
+    11: ["11/DSC00817-2.jpg",  "11/DSC06486.jpg"],
+    12: ["12/DSC02049.jpg",    "12/DSC04116.jpg"],
+    13: ["13/DSC02121.jpg",    "13/DSC02574.jpg"],
+    14: ["14/DSC05549.jpg",    "14/DSC07001.jpg"],
+  };
+  const enc = (p) => p.split("/").map(encodeURIComponent).join("/");
+
+  const stage = document.getElementById("pair-stage");
+  const lbA = document.getElementById("pair-a");
+  const lbB = document.getElementById("pair-b");
+  const fA  = document.getElementById("frame-a");
+  const fB  = document.getElementById("frame-b");
+  const buttons = document.querySelectorAll(".rect[data-folder]");
+
+  let _token = 0;
+  function showFolder(folder, btn) {
+    const files = FOLDER_FILES[folder];
+    if (!files) return;
+    buttons.forEach((b) => b.classList.toggle("active", b === btn));
+    const token = ++_token;
+    lbA.classList.remove("loaded");
+    lbB.classList.remove("loaded");
+    lbA.src = enc(files[0]);
+    lbB.src = enc(files[1]);
+    stage.classList.add("active");
+    Promise.all([decodeImg(lbA), decodeImg(lbB)]).then(() => {
+      if (token !== _token) return;
+      fitPair();
+      requestAnimationFrame(() => {
+        if (token !== _token) return;
+        lbA.classList.add("loaded");
+        lbB.classList.add("loaded");
+      });
+    });
+  }
+  function decodeImg(img) {
+    if (img.decode) return img.decode().catch(() => {});
+    if (img.complete && img.naturalWidth) return Promise.resolve();
+    return new Promise((r) => {
+      img.addEventListener("load", r, { once: true });
+      img.addEventListener("error", r, { once: true });
+    });
+  }
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => showFolder(btn.dataset.folder, btn));
+  });
+  for (const img of [lbA, lbB]) {
+    img.addEventListener("load", () => fitPair());
+  }
+  window.addEventListener("resize", fitPair);
+
+  const FRAME_ASPECT = 4 / 3;
+  const PORTRAIT_FACTOR = 1.13;
+  const LANDSCAPE_FACTOR = 0.95;
+  function fitPair() {
+    if (!stage.classList.contains("active")) return;
+    const rA = lbA.naturalWidth / lbA.naturalHeight;
+    const rB = lbB.naturalWidth / lbB.naturalHeight;
+    if (!rA || !rB) return;
+    const cs = getComputedStyle(stage);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const halfW = (stage.clientWidth - padX) / 2;
+    const btnRow = document.getElementById("btn-row");
+    const reserved = btnRow.getBoundingClientRect().bottom + 40;
+    const availH = Math.max(300, window.innerHeight - reserved - padY - 24);
+    // narrow = portrait or square (image width <= frame width when height-fit)
+    const aNarrow = rA <= 1;
+    const bNarrow = rB <= 1;
+    const mixed = aNarrow !== bNarrow;
+    const bothNarrow = aNarrow && bNarrow;
+    stage.classList.toggle("mixed", mixed);
+    stage.classList.toggle("both-portrait", bothNarrow);
+    fA.classList.toggle("portrait",  aNarrow);
+    fA.classList.toggle("landscape", !aNarrow);
+    fB.classList.toggle("portrait",  bNarrow);
+    fB.classList.toggle("landscape", !bNarrow);
+    const boxW = Math.min(halfW, ((availH - 40) / PORTRAIT_FACTOR) * FRAME_ASPECT);
+    const boxH = boxW / FRAME_ASPECT;
+    // Landscape frame shifts down only when the narrow one is a strict
+    // portrait (extends past the frame bottom via PORTRAIT_FACTOR). A
+    // square stays inside the frame, so no downshift is needed.
+    const narrowR = mixed ? (aNarrow ? rA : rB) : null;
+    const narrowIsPortrait = narrowR != null && narrowR < 1;
+    const landscapeShift = (mixed && narrowIsPortrait) ? ((PORTRAIT_FACTOR - 1) / 2) * boxH + 20 : 0;
+    stage.style.setProperty("--landscape-shift", landscapeShift + "px");
+
+    function widthOf(r) {
+      if (r < 1) return boxH * PORTRAIT_FACTOR * r;              // portrait
+      if (r === 1) return boxH * LANDSCAPE_FACTOR;               // square
+      const wByHeight = boxH * LANDSCAPE_FACTOR * r;
+      const wByWidth  = boxW * LANDSCAPE_FACTOR;
+      return Math.min(wByHeight, wByWidth);
+    }
+    const MIXED_GAP = 42;
+    let mixedPortraitShift = 0;
+    if (mixed) {
+      const wN = widthOf(aNarrow ? rA : rB);
+      const wW = widthOf(aNarrow ? rB : rA);
+      const currentGap = halfW - wN / 2 - wW / 2;
+      const shift = Math.max(0, currentGap - MIXED_GAP);
+      mixedPortraitShift = aNarrow ? shift : -shift;
+    }
+    stage.style.setProperty("--mixed-portrait-shift", mixedPortraitShift + "px");
+
+    const TWO_PORTRAIT_GAP = 42;
+    let shiftA = 0, shiftB = 0;
+    if (bothNarrow) {
+      const wA = widthOf(rA);
+      const wB = widthOf(rB);
+      shiftA = Math.max(0, halfW / 2 - wA / 2 - TWO_PORTRAIT_GAP / 2);
+      shiftB = Math.max(0, halfW / 2 - wB / 2 - TWO_PORTRAIT_GAP / 2);
+    }
+    stage.style.setProperty("--portrait-shift-a", shiftA + "px");
+    stage.style.setProperty("--portrait-shift-b", (-shiftB) + "px");
+    for (const f of [fA, fB]) {
+      f.style.width  = boxW + "px";
+      f.style.height = boxH + "px";
+    }
+    for (const img of [lbA, lbB]) {
+      const r = img.naturalWidth / img.naturalHeight;
+      if (!r) { img.style.maxWidth = ""; img.style.maxHeight = ""; continue; }
+      if (r < 1) {
+        // portrait — grow past frame
+        img.style.maxHeight = (boxH * PORTRAIT_FACTOR) + "px";
+        img.style.maxWidth  = (boxW * PORTRAIT_FACTOR) + "px";
+      } else if (r === 1) {
+        // square — fit inside frame, height-bounded so it stays narrow
+        const side = boxH * LANDSCAPE_FACTOR;
+        img.style.maxHeight = side + "px";
+        img.style.maxWidth  = side + "px";
+      } else {
+        // landscape
+        img.style.maxHeight = (boxH * LANDSCAPE_FACTOR) + "px";
+        img.style.maxWidth  = (boxW * LANDSCAPE_FACTOR) + "px";
+      }
+    }
+  }
+</script>
+</body>
+</html>
