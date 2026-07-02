@@ -120,23 +120,23 @@
 <body>
 
 <div class="row" id="btn-row">
-  <button class="rect" style="background:#b23a2b" data-folder="1">E</button>
-  <button class="rect" style="background:#d1552e" data-folder="2">t</button>
-  <button class="rect" style="background:#d67a3a" data-folder="3">h</button>
-  <button class="rect" style="background:#dba045" data-folder="4">i</button>
-  <button class="rect" style="background:#c9a13a" data-folder="5">o</button>
-  <button class="rect" style="background:#e6c76e" data-folder="6">p</button>
-  <button class="rect" style="background:#9fc24a" data-folder="7">i</button>
-  <button class="rect" style="background:#4a9990" data-folder="8">a</button>
+  <button class="rect" style="background:#1b4b1f" data-folder="4">E</button>
+  <button class="rect" style="background:#1f5824" data-folder="6">t</button>
+  <button class="rect" style="background:#236428" data-folder="1">h</button>
+  <button class="rect" style="background:#27702d" data-folder="14">i</button>
+  <button class="rect" style="background:#2c7c32" data-folder="13">o</button>
+  <button class="rect" style="background:#308837" data-folder="12">p</button>
+  <button class="rect" style="background:#34943c" data-folder="15">i</button>
+  <button class="rect" style="background:#38a041" data-folder="7">a</button>
   <div class="spacer"></div>
-  <button class="rect" style="background:#3ea89a" data-folder="9">i</button>
-  <button class="rect" style="background:#1f6fb3" data-folder="10">n</button>
+  <button class="rect" style="background:#3dad46" data-folder="9">i</button>
+  <button class="rect" style="background:#41b94b" data-folder="2">n</button>
   <div class="spacer"></div>
-  <button class="rect" style="background:#3a6a8c" data-folder="11">f</button>
-  <button class="rect" style="background:#6a5a9c" data-folder="12">a</button>
-  <button class="rect" style="background:#7c4a9c" data-folder="13">c</button>
-  <button class="rect" style="background:#9b6a91" data-folder="14">e</button>
-  <button class="rect" style="background:#c07488" data-folder="15">s</button>
+  <button class="rect" style="background:#4ac054" data-folder="8">f</button>
+  <button class="rect" style="background:#57c460" data-folder="3">a</button>
+  <button class="rect" style="background:#63c86b" data-folder="5">c</button>
+  <button class="rect" style="background:#6fcc77" data-folder="10">e</button>
+  <button class="rect" style="background:#7bd182" data-folder="11">s</button>
 </div>
 
 <section class="pair-stage" id="pair-stage">
@@ -206,8 +206,18 @@
       img.addEventListener("error", r, { once: true });
     });
   }
+  const prefetched = new Set();
+  function prefetchFolder(folder) {
+    if (prefetched.has(folder)) return;
+    prefetched.add(folder);
+    const files = FOLDER_FILES[folder];
+    if (!files) return;
+    for (const f of files) new Image().src = enc(f);
+  }
   buttons.forEach((btn) => {
     btn.addEventListener("click", () => showFolder(btn.dataset.folder, btn));
+    btn.addEventListener("pointerenter", () => prefetchFolder(btn.dataset.folder));
+    btn.addEventListener("focus", () => prefetchFolder(btn.dataset.folder));
   });
   for (const img of [lbA, lbB]) {
     img.addEventListener("load", () => fitPair());

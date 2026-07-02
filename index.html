@@ -208,8 +208,18 @@
       img.addEventListener("error", r, { once: true });
     });
   }
+  const prefetched = new Set();
+  function prefetchFolder(folder) {
+    if (prefetched.has(folder)) return;
+    prefetched.add(folder);
+    const files = FOLDER_FILES[folder];
+    if (!files) return;
+    for (const f of files) new Image().src = enc(f);
+  }
   buttons.forEach((btn) => {
     btn.addEventListener("click", () => showFolder(btn.dataset.folder, btn));
+    btn.addEventListener("pointerenter", () => prefetchFolder(btn.dataset.folder));
+    btn.addEventListener("focus", () => prefetchFolder(btn.dataset.folder));
   });
   for (const img of [lbA, lbB]) {
     img.addEventListener("load", () => fitPair());
